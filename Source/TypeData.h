@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------------*/
 //
-// $Title:          MiniMP3.h
+// $Title:          TypeData.h
 // $Description:    Mini mp3 Interface.
 //
 // $Rev:            0.0.1
@@ -14,20 +14,13 @@
 // $Notes:
 //
 /*----------------------------------------------------------------------------*/
-#ifndef __MINI_MP3_H
-#define __MINI_MP3_H
-
-#include "EEA_port.h"
-// answer
+// step mashine
 typedef enum{
-    ERROR = -1,
-    OK,
-    DELAY,
-    NO_ANSWER
-}TypeAnswer;
-
-/*----------------------------------------------------------------------------*/
-void machineMP3(void);
-void disabledMode(void);
-
-#endif
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN
+}TypeStep;

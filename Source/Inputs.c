@@ -18,7 +18,7 @@
 #include <NXP/iolpc2103.h>
 #include "Inputs.h"
 #include "Pins.h"
-#include "MiniMP3.h"
+#include "TypeData.h"
 
 static bool buttonOK = false;
 
@@ -70,7 +70,7 @@ void checkButton(void)
     if(step == ONE)
     {
       if(!buttonOK){
-        if(isButtonIn()==true){
+        if(isButtonIn()==false){ // low level
             if(timeDelay++>=TIME_DELAY){
                 buttonOK = true;
                 step = TWO;
@@ -81,7 +81,7 @@ void checkButton(void)
     else if(step == TWO)
     {
         timeDelay = 0;
-        if(isButtonIn()==false){
+        if(isButtonIn()==true){ // High level
             step = ONE;
         }
     }
@@ -91,6 +91,7 @@ void checkButton(void)
 */
 bool retStatusButton(void)
 {
-  bool retButton = buttonOK;
+  const bool retButton = buttonOK;
+  buttonOK = false;
   return retButton;
 }

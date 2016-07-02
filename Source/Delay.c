@@ -15,6 +15,7 @@
 //
 /*----------------------------------------------------------------------------*/
 #include "Delay.h"
+#include "TypeData.h"
 
 volatile  uint8 System10ms;
 volatile  uint8 System100ms;
@@ -45,7 +46,7 @@ uint8 GetTimerTik(uint8 timers)
 /*----------------------------------------------------------------------------*/
 bool DelayOut(uint8 nStartTime,uint8 nCurrentTime,uint8 Delay)
 {
-    uint8 MaxLimit = 255;
+    uint8 MaxLimit = sizeof(MaxLimit)*0xFF;
 
     if((nStartTime+Delay) > MaxLimit){
         if((nCurrentTime >= (nStartTime+Delay-MaxLimit-1))&&(nCurrentTime < nStartTime))
@@ -87,3 +88,37 @@ void TimerCooling(void)
     System1sec++;
 }
 /*----------------------------------------------------------------------------*/
+/**
+* time delay step 10 ms. Total delay time  = (10*val)ms
+* value 1: 0...255
+* value 2: 0...MAX_TIMER
+* return: true - time is up, false - delay
+*/
+bool ms10TimeDelay(const uint8 valTime,const uint8 curTimer)
+{
+    static TypeStep step[MAX_TIMER] = {ONE};
+    static uint8 timeDelay[MAX_TIMER];
+
+    // check max timer
+    if(curTimer>=MAX_TIMER){
+        return false;
+    }
+
+    switch(step[curTimer])
+    {
+        case ONE:
+            timeDelay[curTimer] = GetTimerTik(tTimer10ms);
+            step[curTimer] = TWO;
+        break;
+        case TWO:
+            if(DelayOut(timeDelay[curTimer],GetTimerTik(tTimer10ms),valTime)){
+                step[curTimer] = ONE;
+                return true;
+            }
+        break;
+        default:
+            step[curTimer] = ONE;
+        return false;
+    }
+    return false;
+}

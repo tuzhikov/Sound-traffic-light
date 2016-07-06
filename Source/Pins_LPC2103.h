@@ -112,11 +112,11 @@
 #define PIN_12_SEL      PINSEL_GPIO
 #define PIN_12_PIN      FIO_PIN_ZERO
 
-// Pin 13 - SLC
+// Pin 13 - SLC SHDN amplifier
 #define PIN_13_DIR      FIO_DIR_OUTPUT
 #define PIN_13_MASK     FIO_NOT_MASKED
 #define PIN_13_SEL      PINSEL_GPIO
-#define PIN_13_PIN      FIO_PIN_ZERO
+#define PIN_13_PIN      FIO_PIN_ONE
 
 // Pin 14 - BOOT_EN
 #define PIN_14_DIR      FIO_DIR_INPUT
@@ -254,7 +254,7 @@
 
 #define SLA_MASK          0x02000000UL
 #define SLB_MASK          0x04000000UL
-#define SLC_MASK          0x00002000UL
+#define SLC_MASK          0//0x00002000UL
 #define SLD_MASK          0//0x00008000UL
 #define SLE_MASK          0x00010000UL
 #define SLF_MASK          0//0x00020000UL
@@ -311,6 +311,7 @@
 #define SHDN_CONTR_MASK   0x00000010UL
 #define BUZER_MASK        0x00008000UL
 #define BUTTON_PORT       0x00020000UL
+#define SHDN_AMPL_MASK    0x00002000UL
 
 
 #define ADC_POWER_FB_CHANNEL   2

@@ -22,5 +22,6 @@ void setParametrVibro(const bool enabled,
                       const uint8 timeOn,
                       const uint8 timeOff,
                       const uint8 timeDelay,
-                      const uint8 timeCount);
+                      const uint8 timeCount,
+                      const uint8 globalCount);
 

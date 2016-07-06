@@ -79,8 +79,8 @@ static bool enabledRedSignal(void);
 static bool enabledGreenSignal(void);
 static int16 valueChanelOne(const uint8 val);
 static int16 valueChanelTwo(const uint8 val);
-static void enableModuleOne(const bool on);
-static void enableModuleTwo(const bool on);
+//static void enableModuleOne(const bool on);
+//static void enableModuleTwo(const bool on);
 
 typedef enum{OFF_STATE,RED_STATE,GREEN_STAT,END_STAT}TMainState;
 static bool (*operationModeMP3[])()={disabledSignal,enabledRedSignal,enabledGreenSignal};
@@ -321,23 +321,38 @@ static void takeMessageMp3(void)
 /**
 *
 */
-static void enableModuleOne(const bool on)
+
+/*static void enableModuleOne(const bool on)
 {
 
 }
+*/
 /**
 *
 */
+/*
 static void enableModuleTwo(const bool on)
 {
 
 }
+*/
 /**
 *
 */
 static void enableButtonLed(const bool on)
 {
 
+}
+/**
+* LOW level sdh On
+*/
+static void enableShdMode(const bool sdnOn)
+{
+    if(sdnOn){
+        FIOSET |= SHDN_AMPL_MASK;
+    }else{
+        FIOCLR |= SHDN_AMPL_MASK;
+    }
 }
 /**
 *
@@ -372,7 +387,7 @@ static uint8 getNumberMusic(const uint16 currTime)
 static uint16 retValueMP3(const uint16 value)
 {
   #ifdef TEST_MODUE_MP3
-    return 15;
+    return 27; //27
   #else
     const uint16 maxValueMP3 = 30;
     if(value==0)return 0;
@@ -419,6 +434,7 @@ static bool enabledRedSignal(void)
 {
     const uint8 numberTimer = 0;
     static uint32 numberMusic = MUSIC_RED_MODE;
+    static bool buttonOk = false;
     bool result = false;
 
     // working green sygnal
@@ -426,15 +442,24 @@ static bool enabledRedSignal(void)
         step = ONE;
         return true;
     }
+    // check button
+    if(retStatusButton()){
+        buttonOk = true;
+        setParametrVibro(true,10,10,20,1,2);
+        enableButtonLed(true);
+    }
     // working red sygnal
     switch(step)
     {
         case ONE:
+            enableShdMode(false);
+            clearParametrVibro();
             if(ms10TimeDelay(50,numberTimer)){
+                //enableShdMode(false);
                 mp3_set_volume(retValueMP3(pStatus->CurVolume));
                 valueChanelOne(MAX_VALUE_CHANEL_ONE);
                 valueChanelTwo(MAX_VALUE_CHANEL_TWO);
-                clearParametrVibro();
+                //clearParametrVibro();
                 step = TWO;
             }
         break;
@@ -459,14 +484,22 @@ static bool enabledRedSignal(void)
             if(checkCommand(STAY_TWO)){
                 step = FOUR;
             }
+            /*
+            if(retStatusButton()){
+                buttonOk = true;
+                setParametrVibro(true,10,10,20,1,2);
+                enableButtonLed(true);
+            }
+            */
         break;
         // check button
         case FOUR:
             // button OK
-            if(retStatusButton()){
+            if(buttonOk){
+                buttonOk = false;
                 mp3_play_number(MUSIC_RED_MODE);
-                setParametrVibro(true,20,20,40,2);
-                enableButtonLed(true);
+                //setParametrVibro(true,5,5,10,1);
+                //enableButtonLed(true);
                 step = FIVE;
             }else{
                 mp3_play_number(MUSIC_TIK_TAK);
@@ -475,8 +508,8 @@ static bool enabledRedSignal(void)
         break;
         // button OK
         case FIVE:
-            if(ms10TimeDelay(20+20+50,numberTimer)){
-                clearParametrVibro();
+            if(ms10TimeDelay(50,numberTimer)){
+                //clearParametrVibro();
                 enableButtonLed(false);
                 step = SIX;
             }
@@ -490,6 +523,7 @@ static bool enabledRedSignal(void)
                 if(checkCommand(STAY_TWO)){
                     numberMusic = getNumberMusic(pStatus->RCount);
                     mp3_play_number(numberMusic);
+                    buttonOk = false;
                     step = THREE; // waiting for an answer
                 }
             }
@@ -497,6 +531,8 @@ static bool enabledRedSignal(void)
         case SEVEN:
             if(ms10TimeDelay(250,numberTimer)){
                 step = FOUR; // check button
+                retStatusButton();
+                buttonOk = false;
             }
         break;
         default:
@@ -526,6 +562,7 @@ static bool enabledGreenSignal(void)
        ((pStatus->GCount < TIME_GREEN_END)&&(pStatus->GCount != ERROR))){
         step = ONE;
         clearParametrVibro();
+        enableShdMode(true);
         return true;
     }
     // green color working
@@ -533,7 +570,6 @@ static bool enabledGreenSignal(void)
     {
         case ONE:
           if(ms10TimeDelay(10,numderTimer)){
-            setParametrVibro(true,30,30,80,2);
             valueChanelOne(MAX_VALUE_CHANEL_ONE);
             valueChanelTwo(MAX_VALUE_CHANEL_TWO);
             step = TWO;
@@ -542,6 +578,7 @@ static bool enabledGreenSignal(void)
         // START POWER MP3
         case TWO:
             if((ms10TimeDelay(30,numderTimer))||(checkCommand(START_POWER))){
+                setParametrVibro(true,1,1,80,30,0);
                 numberMusic = MUSIC_GREEN_MODE;
                 step = THREE;
             }
@@ -549,6 +586,7 @@ static bool enabledGreenSignal(void)
         // MP3 is WORKING
         case THREE:
             if(ms10TimeDelay(50,numderTimer)){
+                enableShdMode(false);
                 const uint16 value = retValueMP3(pStatus->CurVolume);
                 mp3_set_volume(value);
                 step = FOUR;
@@ -642,5 +680,6 @@ void machineMP3(void)
 void disabledMode(void)
 {
     disabledSignal();
+    enableShdMode(true);
     clearParametrVibro();
 }
